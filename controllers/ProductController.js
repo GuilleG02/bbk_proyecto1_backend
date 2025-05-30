@@ -82,3 +82,4 @@ async getById(req, res) {
 
 module.exports = ProductController;
 
+// module exports se utiliza aqui para no tener que repetirlo y añadirlo en cada funcion
