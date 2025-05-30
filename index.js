@@ -6,4 +6,6 @@ app.use(express.json());
 app.use("/categories", require("./routes/categories"));
 app.use("/users", require("./routes/users"));
 
+app.use('/product', require('./routes/products'));
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

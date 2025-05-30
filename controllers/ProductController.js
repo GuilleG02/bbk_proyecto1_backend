@@ -1,23 +1,24 @@
 
 const { Product, Category } = require('../models');
 
+const ProductController = {
+
 // Funcion de crear
-exports.create = async (req, res) => {
-  const error = validateProduct(req.body);
-  if (error) return res.status(400).json({ error });
+async create(req, res) {
 
   try {
     const product = await Product.create(req.body);
     res.status(201).json(product);
+    console.log('Creando el producto')
   } catch (err) {
     
     res.status(500).json({ error: 'Error al crear el producto' });
   }
-};
+},
 
 
 // Funcion de actualizar
-exports.update = async (req, res) => {
+async update(req, res) {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
@@ -28,11 +29,11 @@ exports.update = async (req, res) => {
 
     res.status(500).json({ error: 'Error al actualizar el producto' });
   }
-};
+},
 
 
 // Funcion de borrar
-exports.delete = async (req, res) => {
+async delete(req, res) {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
@@ -43,11 +44,11 @@ exports.delete = async (req, res) => {
 
     res.status(500).json({ error: 'Error al eliminar el producto' });
   }
-};
+},
 
 
 // Funcion de mostrar
-exports.getAll = async (req, res) => {
+async getAll(req, res) {
   try {
     const products = await Product.findAll({
       include: [{ model: Category }]
@@ -58,11 +59,11 @@ exports.getAll = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Error al obtener productos' });
   }
-};
+},
 
 
 // Funcion de mostrar por Id
-exports.getById = async (req, res) => {
+async getById(req, res) {
   try {
     const product = await Product.findByPk(req.params.id, {
       include: [{ model: Category }]
@@ -75,4 +76,10 @@ exports.getById = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Error al obtener el producto' });
   }
-};
+}
+
+}
+
+module.exports = ProductController;
+
+// module exports se utiliza aqui para no tener que repetirlo y añadirlo en cada funcion
