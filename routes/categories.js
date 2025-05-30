@@ -7,7 +7,7 @@ router.get("/", CategoryController.getAll);
 router.put("/:id", CategoryController.update);
 router.delete("/:id", CategoryController.delete);
 router.get("/products", CategoryController.getCategoryProducts);
-router.get("/:id", CategoryController.getById);
+router.get("/id/:id", CategoryController.getById);
 router.get("/name/:name", CategoryController.getByName);
 
 module.exports = router;
