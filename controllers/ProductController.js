@@ -1,4 +1,4 @@
-const { Product, Category } = require("../models");
+const { Product, Category, Review, User } = require("../models");
 const { Op } = require("sequelize");
 
 const ProductController = {

@@ -2,38 +2,35 @@ const { Review, Product, ProductReview, User } = require("../models");
 
 const ReviewController = {
 
-  async create(req, res, next) {
-    try {
-      const { content, rating, productId } = req.body;
-      const userId = req.user?.id || req.body.user_id; 
+ async create(req, res, next) {
+  try {
+    const { content, rating, user_id, product_id } = req.body;
+    const userId = req.user?.id || user_id;
 
-      if (!userId || !productId) {
-        return res.status(400).json({ error: "Faltan user_id o productId" });
-      }
-
-      const review = await Review.create({
-        content,
-        rating,
-        user_id: userId,
-      });
-
-      await ProductReview.create({
-        review_id: review.id,
-        product_id: productId,
-      });
-
-      res.status(201).json({ message: "Review creada", review });
-    } catch (err) {
-      next(err);
+    if (!userId || !product_id) {
+      return res.status(400).json({ error: "Faltan user_id o product_id" });
     }
-  },
+
+    const review = await Review.create({
+      content,
+      rating,
+      user_id: userId,
+      product_id, // Ya que Review ahora tiene FK directa a producto
+    });
+
+    res.status(201).json({ message: "Review creada", review });
+  } catch (err) {
+    next(err);
+  }
+},
+
 
   async getAll(req, res) {
     try {
       const reviews = await Review.findAll({
         include: [
           { model: User, as: "user", attributes: ["id", "name", "email"] },
-          { model: Product, as: "products" },
+          { model: Product, as: "product" },
         ],
       });
       res.json(reviews);
@@ -72,7 +69,7 @@ const ReviewController = {
     const review = await Review.findByPk(req.params.id, {
       include: [
         { model: User, as: "user", attributes: ["id", "name", "email"] },
-       { model: Product, as: "products" },  
+       { model: Product, as: "product" },  
       ],
     });
 
