@@ -24,29 +24,28 @@ const OrderController = {
 
   async createOrder(req, res) {
   try {
-    const { products } = req.body;
+    const { products, user_id } = req.body;
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: 'Se requiere una lista de productos' });
     }
+    if (!user_id) {
+      return res.status(400).json({ error: 'Se requiere user_id para la orden' });
+    }
 
-    const newOrder = await Order.create();
+    const newOrder = await Order.create({ user_id });
 
     await newOrder.addProducts(products);
 
     const orderWithProducts = await Order.findByPk(newOrder.id, {
-      include: [{
-        model: Product,
-        through: { attributes: [] } 
-      }]
+      include: [{ model: Product, through: { attributes: [] } }]
     });
 
     res.status(201).json(orderWithProducts);
   } catch (error) {
-  console.error('Error creando pedido:', error);
-  res.status(500).json({ error: 'Error al crear el pedido' });
-}
-
+    console.error('Error creando pedido:', error);
+    res.status(500).json({ error: 'Error al crear el pedido' });
+  }
 }
 
 }
