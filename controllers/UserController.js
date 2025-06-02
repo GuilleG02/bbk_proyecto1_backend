@@ -1,43 +1,30 @@
-const { User, Orders, Token, Sequelize } = require("../models/index.js");
+const {
+  User,
+  Order,
+  Product,
+  Token,
+  Sequelize,
+} = require("../models/index.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { jwt_secret } = require("../config/config.json")["development"];
 const { Op } = Sequelize;
 
-function validateUser(data) {
-  const requiredFields = ["name", "email", "password"];
-
-  for (const field of requiredFields) {
-    if (!data[field] || data[field].trim() === "") {
-      return `El campo '${field}' es obligatorio.`;
-    }
-  }
-
-  if (!/\S+@\S+\.\S+/.test(data.email)) {
-    return "El email no tiene un formato válido.";
-  }
-
-  if (data.password.length < 6) {
-    return "La contraseña debe tener al menos 6 caracteres.";
-  }
-
-  return null;
-}
-
 const UserController = {
   //CREATE
-  async insert(req, res) {
-    const userError = validateUser(req.body);
-    if (userError) {
-      return res.status(400).send({ message: userError });
-    }
-
+  async insert(req, res, next) {
     try {
       const existingUser = await User.findOne({
         where: { email: req.body.email },
       });
       if (existingUser) {
         return res.status(409).send({ message: "El email ya está registrado" });
+      }
+
+      if (req.body.password.length < 6 || req.body.password.length > 16) {
+        return res.status(400).send({
+          message: "La contraseña debe tener entre 6 y 16 caracteres",
+        });
       }
 
       req.body.role = "user";
@@ -49,7 +36,37 @@ const UserController = {
       res.status(201).send({ message: "Usuario creado con éxito", newUser });
     } catch (error) {
       console.error(error);
+      next(error);
       res.status(500).send({ message: "Error al crear el usuario" });
+    }
+  },
+
+  //READ
+  async getAll(req, res) {
+    try {
+      const users = await User.findAll();
+      res.status(200).send(users);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error al obtener los usuarios" });
+    }
+  },
+
+  //DELETE
+  async delete(req, res) {
+    try {
+      const user = await User.findByPk(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
+      await User.destroy({
+        where: { id: req.params.id },
+      });
+
+      res.status(200).send({ message: "Usuario eliminado correctamente" });
+    } catch (error) {
+      console.error("Error al eliminar el usuario:", error);
+      res.status(500).json({ mensaje: "Error del servidor" });
     }
   },
 
@@ -93,32 +110,35 @@ const UserController = {
     }
   },
 
-  //READ **Cambiar**
-  async getAll(req, res) {
+  //USER-ORDERS
+  async getMyOrders(req, res) {
     try {
-      const users = await User.findAll();
-      res.status(200).send(users);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Error al obtener los usuarios" });
-    }
-  },
-
-  //DELETE
-  async delete(req, res) {
-    try {
-      const user = await User.findByPk(req.params.id);
-      if (!user) {
-        return res.status(404).json({ message: "Usuario no encontrado" });
-      }
-      await User.destroy({
-        where: { id: req.params.id },
+      const user = User.findByPk(req.params.id, {
+        attributes: ["name"],
+        include: [
+          {
+            model: Order,
+            include: [
+              {
+                model: Product,
+                through: {
+                  attributes: [],
+                  // attributes: ["quatinty", "unit_price"], //ADD IN orderproducts
+                },
+              },
+            ],
+          },
+        ],
       });
 
-      res.status(200).send({ message: "Usuario eliminado correctamente" });
+      if (!user) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+
+      res.json(user);
     } catch (error) {
-      console.error("Error al eliminar el usuario:", error);
-      res.status(500).json({ mensaje: "Error del servidor" });
+      console.error(err);
+      res.status(500).json({ error: "Error interno del servidor" });
     }
   },
 };
