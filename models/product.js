@@ -5,9 +5,10 @@ module.exports = (sequelize, DataTypes) => {
 
   class Product extends Model {
     static associate(models) {
-      Product.belongsToMany(models.Review, {
-      through: models.ProductReview,
-      foreignKey: 'product_id',
+     Product.hasMany(models.Review, {
+        foreignKey: "product_id",
+        as: "reviews",
+        onDelete: "CASCADE",
       });
       Product.belongsTo(models.Category, {
         foreignKey: "category_id",

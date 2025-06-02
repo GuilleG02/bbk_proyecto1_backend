@@ -43,33 +43,49 @@ const ProductController = {
     }
   },
 
-  // Funcion de mostrar
-  async getAll(req, res) {
-    try {
-      const products = await Product.findAll({
-        include: [{ model: Category }],
-      });
-      res.json(products);
-    } catch (err) {
-      res.status(500).json({ error: "Error al obtener productos" });
-    }
-  },
+  //Funcion de mostrar
+async getAll(req, res) {
+  try {
+    const products = await Product.findAll({
+      include: [
+        { model: Category }, // categoría del producto
+        {
+          model: Review,
+          as: "reviews",
+          include: [{ model: User, as: "user", attributes: ["id", "name", "email"] }],
+        },
+      ],
+    });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener productos" });
+  }
+},
 
   // Funcion de mostrar por Id
   async getById(req, res) {
-    try {
-      const product = await Product.findByPk(req.params.id, {
-        include: [{ model: Category }],
-      });
+  try {
+    const product = await Product.findByPk(req.params.id, {
+      include: [
+        { model: Category },
+        {
+          model: Review,
+          as: "reviews",
+          include: [{ model: User, as: "user", attributes: ["id", "name", "email"] }],
+        },
+      ],
+    });
 
-      if (!product)
-        return res.status(404).json({ error: "Producto no encontrado" });
-
-      res.json(product);
-    } catch (err) {
-      res.status(500).json({ error: "Error al obtener el producto" });
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" });
     }
-  },
+
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener el producto" });
+  }
+},
+
 
   // Funcion de filtrar por nombre
 
