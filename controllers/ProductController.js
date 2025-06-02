@@ -1,19 +1,21 @@
 const { Product, Category } = require("../models");
+const { Op } = require("sequelize");
 
 const ProductController = {
   // Funcion de crear
-  async create(req, res) {
+  async create(req, res, next) {
     try {
       const product = await Product.create(req.body);
       res.status(201).json(product);
       console.log("Creando el producto");
     } catch (err) {
+       next(err);
       res.status(500).json({ error: "Error al crear el producto" });
     }
   },
 
   // Funcion de actualizar
-  async update(req, res) {
+  async update(req, res, next) {
     try {
       const product = await Product.findByPk(req.params.id);
       if (!product)
@@ -22,6 +24,7 @@ const ProductController = {
       await product.update(req.body);
       res.json(product);
     } catch (err) {
+      next(err);
       res.status(500).json({ error: "Error al actualizar el producto" });
     }
   },
@@ -71,28 +74,28 @@ const ProductController = {
   // Funcion de filtrar por nombre
 
   async getByName(req, res) {
-    try {
-      const { name } = req.params;
+  try {
+    const { name } = req.params;
 
-      const product = await Product.findOne({
-        where: {
-          name: {
-            [Op.iLike]: `%${name}%`,
-          },
+    const product = await Product.findOne({
+      where: {
+        name: {
+          [Op.like]: `%${name}%`, 
         },
-        include: [{ model: Category }],
-      });
+      },
+      include: [{ model: Category }],
+    });
 
-      if (!product)
-        return res.status(404).json({ error: "Producto no encontrado" });
-
-      res.json(product);
-    } catch (err) {
-      res
-        .status(500)
-        .json({ error: "Error al obtener el producto por nombre" });
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" });
     }
-  },
+
+    res.json(product);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al obtener el producto por nombre" });
+  }
+},
 
   // Funcion de filtrar productos por precio
   async getByPrice(req, res) {

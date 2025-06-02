@@ -1,12 +1,9 @@
 "use strict";
 const { Model } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
+
   class Product extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       Product.belongsTo(models.Category, {
         foreignKey: "category_id",
@@ -17,16 +14,54 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
+
   Product.init(
     {
-      name: DataTypes.STRING,
-      price: DataTypes.DECIMAL,
-      category_id: DataTypes.INTEGER,
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "El nombre del producto no puede estar vacío",
+          },
+          len: {
+            args: [2, 100],
+            msg: "El nombre debe tener entre 2 y 100 caracteres",
+          },
+        },
+      },
+      price: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+        validate: {
+          isDecimal: {
+            msg: "El precio debe ser un número decimal válido",
+          },
+          min: {
+            args: [0],
+            msg: "El precio no puede ser negativo",
+          },
+        },
+      },
+      category_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          isInt: {
+            msg: "El ID de la categoría debe ser un número entero",
+          },
+          notNull: {
+            msg: "La categoría es obligatoria",
+          },
+        },
+      },
     },
     {
       sequelize,
       modelName: "Product",
     }
   );
+
   return Product;
 };
+

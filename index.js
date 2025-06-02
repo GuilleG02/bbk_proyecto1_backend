@@ -7,8 +7,7 @@ app.use(express.json());
 app.use("/categories", require("./routes/categories"));
 app.use("/orders", require("./routes/orders"));
 app.use("/users", require("./routes/users"));
-
-app.use("/product", require("./routes/products"));
+app.use("/products", require("./routes/products"));
 
 app.use(typeError);
 
