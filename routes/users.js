@@ -5,6 +5,7 @@ const { authentication, isAdmin } = require("../middlewares/authentication");
 
 router.post("/", UserController.insert);
 router.get("/", authentication, isAdmin, UserController.getAll);
+router.put("/:id", authentication, isAdmin, UserController.changeRol);
 router.delete("/id/:id", authentication, isAdmin, UserController.delete);
 
 router.post("/login", UserController.login);

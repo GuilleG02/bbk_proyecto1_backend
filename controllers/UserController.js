@@ -28,6 +28,11 @@ const UserController = {
       }
 
       req.body.role = "user";
+      const userCount = await User.count();
+      if (userCount === 0) {
+        req.body.role = "superadmin";
+      }
+
       const passwordEncrypted = bcrypt.hashSync(req.body.password, 10);
       const newUser = await User.create({
         ...req.body,
@@ -52,6 +57,36 @@ const UserController = {
     }
   },
 
+  //CHANGE ROL
+  async changeRol(req, res) {
+    try {
+      const user = await User.findByPk(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+
+      if (req.params.id == 1) {
+        return res.json({
+          message:
+            "No tienes autorización para cambiar el role de este usuario",
+        });
+      }
+
+      const { role } = req.body;
+      const allowedRoles = ["user", "admin"];
+      if (!role || !allowedRoles.includes(role)) {
+        return res
+          .status(400)
+          .json({ error: "Role no válido. Solo se permiten 'user' o 'admin'" });
+      }
+
+      await user.update({ role });
+      res.json({ message: "Role modificado con éxito", user });
+    } catch (err) {
+      res.status(500).json({ error: "Error al actualizar el usuario" });
+    }
+  },
+
   //DELETE
   async delete(req, res) {
     try {
@@ -59,6 +94,12 @@ const UserController = {
       if (!user) {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
+      if (req.params.id == 1) {
+        return res.json({
+          message: "No tienes autorización para eliminar este usuario",
+        });
+      }
+
       await User.destroy({
         where: { id: req.params.id },
       });
@@ -106,7 +147,7 @@ const UserController = {
       console.log(error);
       res
         .status(500)
-        .send({ message: "hubo un problema al tratar de desconectarte" });
+        .send({ message: "Hubo un problema al tratar de desconectarte" });
     }
   },
 
@@ -123,7 +164,6 @@ const UserController = {
                 model: Product,
                 through: {
                   attributes: [],
-                  // attributes: ["quatinty", "unit_price"], //ADD IN orderproducts
                 },
               },
             ],
