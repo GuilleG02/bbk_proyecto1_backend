@@ -77,7 +77,9 @@ const CategoryController = {
   //CATEGORY BY ID
   async getById(req, res) {
     try {
-      const category = await Category.findByPk(req.params.id);
+      const category = await Category.findByPk(req.params.id, {
+        include: [{ model: Product }],
+      });
       if (!category) {
         return res.status(404).json({ message: "Categoría no encontrada" });
       }
@@ -98,6 +100,7 @@ const CategoryController = {
             [Op.like]: `%${name}%`,
           },
         },
+        include: [{ model: Product }],
       });
       if (!category) {
         return res.status(404).json({ message: "Categoría no encontrada" });
