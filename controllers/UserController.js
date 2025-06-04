@@ -154,7 +154,7 @@ const UserController = {
   //USER-ORDERS
   async getMyOrders(req, res) {
     try {
-      const user = User.findByPk(req.params.id, {
+      const user = await User.findByPk(req.user.id, {
         attributes: ["name"],
         include: [
           {
@@ -162,6 +162,7 @@ const UserController = {
             include: [
               {
                 model: Product,
+
                 through: {
                   attributes: [],
                 },
