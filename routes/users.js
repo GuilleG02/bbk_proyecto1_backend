@@ -9,6 +9,7 @@ router.put("/:id", authentication, isAdmin, UserController.changeRol);
 router.delete("/id/:id", authentication, isAdmin, UserController.delete);
 
 router.post("/login", UserController.login);
+router.get("/confirm/:emailToken", UserController.confirm);
 router.delete("/logout", authentication, UserController.logout);
 router.get("/me", authentication, UserController.getMyOrders);
 
