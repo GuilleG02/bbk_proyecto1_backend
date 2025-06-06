@@ -124,9 +124,9 @@ const UserController = {
           .status(400)
           .send({ message: "Usuario o contraseña incorrectos" });
       }
-      if (!user.confirmed) {
-        return res.status(400).send({ message: "Debes confirmar tu correo" });
-      }
+      // if (!user.confirmed) {
+      //   return res.status(400).send({ message: "Debes confirmar tu correo" });
+      // }
 
       const token = jwt.sign({ id: user.id }, jwt_secret);
       Token.create({ token, UserId: user.id });

@@ -2,10 +2,9 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-
   class Product extends Model {
     static associate(models) {
-     Product.hasMany(models.Review, {
+      Product.hasMany(models.Review, {
         foreignKey: "product_id",
         as: "reviews",
         onDelete: "CASCADE",
@@ -63,9 +62,9 @@ module.exports = (sequelize, DataTypes) => {
 
       image: {
         type: DataTypes.STRING,
-        allowNull: true, 
+        allowNull: true,
         validate: {
-        isUrl: false, 
+          // isUrl: false,
         },
       },
     },
@@ -77,4 +76,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Product;
 };
-
