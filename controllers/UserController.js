@@ -7,6 +7,7 @@ const {
 } = require("../models/index.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { where } = require("sequelize");
 const { jwt_secret } = require("../config/config.json")["development"];
 const { Op } = Sequelize;
 
@@ -37,6 +38,7 @@ const UserController = {
       const newUser = await User.create({
         ...req.body,
         password: passwordEncrypted,
+        confirmed: false,
       });
       res.status(201).send({ message: "Usuario creado con éxito", newUser });
     } catch (error) {
@@ -112,23 +114,26 @@ const UserController = {
   },
 
   //LOGIN
-  login(req, res) {
-    User.findOne({ where: { email: req.body.email } }).then((user) => {
-      if (!user) {
-        return res
-          .status(400)
-          .send({ message: "Usuario o contraseña incorrectos" });
-      }
+  async login(req, res) {
+    try {
+      const user = await User.findOne({ where: { email: req.body.email } });
       const isMatch = bcrypt.compareSync(req.body.password, user.password);
-      if (!isMatch) {
+
+      if (!user || !isMatch) {
         return res
           .status(400)
           .send({ message: "Usuario o contraseña incorrectos" });
       }
+      if (!user.confirmed) {
+        return res.status(400).send({ message: "Debes confirmar tu correo" });
+      }
+
       const token = jwt.sign({ id: user.id }, jwt_secret);
       Token.create({ token, UserId: user.id });
       res.send({ message: "Bienvenid@ " + user.name, user, token });
-    });
+    } catch (error) {
+      console.error("Error al iniciar sesión", error);
+    }
   },
 
   //LOGOUT
