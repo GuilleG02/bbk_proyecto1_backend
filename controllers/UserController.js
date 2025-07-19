@@ -194,28 +194,32 @@ const UserController = {
   //USER-ORDERS
   async getMyOrders(req, res) {
     try {
-      const orders = await Order.findAll({
-        where: { user_id: req.user.id },
+      const user = await User.findByPk(req.user.id, {
+        attributes: ["name"],
         include: [
           {
-            model: Product,
-            through: { attributes: [] },
+            model: Order,
+            include: [
+              {
+                model: Product,
+
+                through: {
+                  attributes: [],
+                },
+              },
+            ],
           },
         ],
       });
 
-      if (!orders || orders.length === 0) {
-        return res
-          .status(404)
-          .json({ error: "No se encontraron pedidos para este usuario" });
+      if (!user) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
       }
 
-      res.json(orders);
+      res.json(user);
     } catch (error) {
-      console.error("Error en getMyOrders:", error);
-      res
-        .status(500)
-        .json({ error: "Error al obtener los pedidos del usuario" });
+      console.error(err);
+      res.status(500).json({ error: "Error interno del servidor" });
     }
   },
 };
